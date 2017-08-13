@@ -1,5 +1,6 @@
 package br.com.jmsstudio.model;
 
+import br.com.jmsstudio.converter.PurchaseDetailsConverter;
 import com.thoughtworks.xstream.XStream;
 import org.junit.Test;
 
@@ -179,13 +180,55 @@ public class PurchaseTest {
                 "  </products>\n" +
                 "</purchase>";
 
-
         Purchase purchaseWithSubclasses = createPurchaseWithBookAndCellphone();
         XStream xStream = getXstreamConfig();
 
         String generatedXml = xStream.toXML(purchaseWithSubclasses);
 
         assertEquals(expectedXml, generatedXml);
+    }
+
+    @Test
+    public void shouldDoSerializationUsingCustomConverter() {
+        String expectedXml = "<purchase store=\"store1\">\n" +
+                "  <id>1</id>\n" +
+                "  <message>Message related to the purchase</message>\n" +
+                "  <address>\n" +
+                "    <deliveryAddress>\n" +
+                "      <street>Av Paulista</street>\n" +
+                "      <number>123</number>\n" +
+                "      <complement></complement>\n" +
+                "      <zipCode>12345-678</zipCode>\n" +
+                "      <city>São Paulo</city>\n" +
+                "      <state>SP</state>\n" +
+                "    </deliveryAddress>\n" +
+                "  </address>\n" +
+                "  <products>\n" +
+                "    <product code=\"95\">\n" +
+                "      <name>Refrigerator</name>\n" +
+                "      <price>123.4</price>\n" +
+                "      <full-description>A good refrigerator with freezer</full-description>\n" +
+                "    </product>\n" +
+                "    <product code=\"88\">\n" +
+                "      <name>Microwave</name>\n" +
+                "      <price>345.0</price>\n" +
+                "      <full-description>A microwave oven</full-description>\n" +
+                "    </product>\n" +
+                "  </products>\n" +
+                "</purchase>";
+
+        Purchase purchase = createPurchaseWithProducts();
+
+        XStream xStream = getXstreamConfig();
+        xStream.registerConverter(new PurchaseDetailsConverter());
+
+        String xml = xStream.toXML(purchase);
+
+        assertEquals(expectedXml, xml);
+
+        Purchase generatedPurchase = (Purchase) xStream.fromXML(xml);
+
+        assertEquals(purchase, generatedPurchase);
     }
 
 }
